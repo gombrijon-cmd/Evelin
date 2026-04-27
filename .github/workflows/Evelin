@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evelyn ❤️</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background: black;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* 🌌 galaxia */
+#galaxy {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* contenedor */
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  z-index: 2;
+}
+
+/* botón */
+button {
+  padding: 12px 20px;
+  border-radius: 25px;
+  border: none;
+  background: #e91e63;
+  color: white;
+  animation: latido 1.2s infinite;
+}
+
+@keyframes latido {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+/* texto escritura */
+.texto-dinamico {
+  font-size: 1.2em;
+  min-height: 60px;
+}
+
+/* corazones */
+.heart {
+  position: fixed;
+  color: #ff4d6d;
+  font-size: 12px;
+  transition: all 2.5s ease;
+}
+
+/* explosión */
+.heart-burst {
+  position: absolute;
+  color: #ff4d6d;
+  animation: explode 1s forwards;
+}
+
+@keyframes explode {
+  to {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) scale(1.5);
+  }
+}
+
+/* final */
+.final {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 3s ease;
+  margin-top: 20px;
+}
+
+.final.show {
+  opacity: 1;
+  transform: scale(1);
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="galaxy"></canvas>
+
+<div class="container">
+
+<button id="btn" onclick="iniciar()">❤️ Iniciar ❤️</button>
+
+<div id="texto" style="display:none;">
+  <div id="frase" class="texto-dinamico"></div>
+
+  <div id="final" class="final">
+    💖 Siempre tú… siempre nosotros 💖
+  </div>
+</div>
+
+</div>
+
+<!-- audio -->
+<audio id="latido" src="https://www.soundjay.com/human/heartbeat-01a.mp3"></audio>
+
+<iframe id="musica" width="0" height="0" src="" allow="autoplay"></iframe>
+
+<script>
+
+const frases = [
+"🎂 Feliz cumpleaños, Evelyn ❤️",
+"Hoy no es un día cualquiera…",
+"es el día en que nació alguien que cambió mi vida",
+"Llevamos 3 meses… pero significan mucho para mí",
+"A veces soy difícil de entender… lo sé",
+"pero cada momento contigo vale todo",
+"Gracias por tu paciencia… por tu cariño…",
+"y por quedarte conmigo ❤️",
+"✨ Te elegiría una y mil veces ✨",
+"❤️ Te amo ❤️"
+];
+
+function iniciar() {
+
+  const btn = document.getElementById("btn");
+
+  // 💓 sonido latido
+  document.getElementById("latido").play();
+
+  // 💥 explosión
+  for (let i = 0; i < 25; i++) {
+    let h = document.createElement("div");
+    h.className = "heart-burst";
+    h.innerHTML = "❤️";
+
+    let r = btn.getBoundingClientRect();
+
+    h.style.left = r.left + r.width/2 + "px";
+    h.style.top = r.top + r.height/2 + "px";
+
+    h.style.setProperty('--x',(Math.random()*200-100)+"px");
+    h.style.setProperty('--y',(Math.random()*200-100)+"px");
+
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),1000);
+  }
+
+  btn.style.display = "none";
+
+  document.getElementById("texto").style.display = "block";
+
+  // 🎵 música
+  document.getElementById("musica").src =
+  "https://www.youtube.com/embed/bpOSxM0rNPM?autoplay=1&start=52";
+
+  escribirFrases();
+
+  setTimeout(animarTextoCorazones, 15000);
+
+  setTimeout(()=>{
+    document.getElementById("final").classList.add("show");
+  }, 32000);
+}
+
+/* ✍️ efecto escritura */
+function escribirFrases() {
+
+  const cont = document.getElementById("frase");
+
+  let i = 0;
+
+  function siguiente() {
+
+    if (i >= frases.length) return;
+
+    let texto = frases[i];
+    let j = 0;
+    cont.innerHTML = "";
+
+    let escribir = setInterval(()=>{
+      cont.innerHTML += texto[j];
+      j++;
+
+      if (j >= texto.length) {
+        clearInterval(escribir);
+
+        setTimeout(()=>{
+          cont.innerHTML = "";
+          i++;
+          siguiente();
+        }, 2500);
+      }
+
+    }, 40);
+  }
+
+  siguiente();
+}
+
+/* 💖 corazones texto */
+function animarTextoCorazones() {
+
+  const c = document.createElement("canvas");
+  const ctx = c.getContext("2d");
+
+  c.width = 400;
+  c.height = 150;
+
+  ctx.font = "bold 80px Arial";
+  ctx.fillText("EVELYN", 20, 100);
+
+  const data = ctx.getImageData(0,0,400,150).data;
+  const puntos = [];
+
+  for(let y=0;y<150;y+=4){
+    for(let x=0;x<400;x+=4){
+      let i=(y*400+x)*4;
+      if(data[i]>200) puntos.push({x,y});
+    }
+  }
+
+  const hearts=[];
+
+  puntos.forEach(()=>{
+    let h=document.createElement("div");
+    h.className="heart";
+    h.innerHTML="❤️";
+
+    h.style.left=Math.random()*innerWidth+"px";
+    h.style.top=Math.random()*innerHeight+"px";
+
+    document.body.appendChild(h);
+    hearts.push(h);
+  });
+
+  setTimeout(()=>{
+    hearts.forEach((h,i)=>{
+      let p=puntos[i];
+      h.style.left=(innerWidth/2-200+p.x)+"px";
+      h.style.top=(innerHeight/3+p.y)+"px";
+    });
+  },1000);
+}
+
+/* 🌌 galaxia */
+const canvas=document.getElementById("galaxy");
+const ctx=canvas.getContext("2d");
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+let stars=Array.from({length:100},()=>({
+  x:Math.random()*canvas.width,
+  y:Math.random()*canvas.height,
+  size:Math.random()*1.5,
+  speed:Math.random()*0.3
+}));
+
+function anim(){
+  ctx.fillStyle="black";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle="white";
+
+  stars.forEach(s=>{
+    s.y+=s.speed;
+    if(s.y>canvas.height)s.y=0;
+    ctx.fillRect(s.x,s.y,s.size,s.size);
+  });
+
+  requestAnimationFrame(anim);
+}
+
+anim();
+
+</script>
+
+</body>
+</html>
